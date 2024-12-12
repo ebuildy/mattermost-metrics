@@ -31,7 +31,7 @@ endif
 HAS_SERVER ?= $(shell build/bin/manifest has_server)
 
 # Determine if a webapp is defined in the manifest.
-HAS_WEBAPP ?= $(shell build/bin/manifest has_webapp)
+HAS_WEBAPP ?= #$(shell build/bin/manifest has_webapp)
 
 # Determine if a /public folder is in use
 HAS_PUBLIC ?= $(wildcard public/.)
