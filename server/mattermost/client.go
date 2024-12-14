@@ -36,7 +36,7 @@ func (c *Driver) collectKPIMetrics(metrics *controller.Metrics) error {
 
 	var channels []*model.ChannelWithTeamData
 
-	channelsResp, _, err := c.client.GetAllChannels(ctx, 0, 1000, "1")
+	channelsResp, channelsCountResp, _, err := c.client.GetAllChannelsWithCount(ctx, 0, 100, "1")
 
 	if err != nil {
 		c.logger.Error(fmt.Sprintf("failed to get all channels: %s", err))
@@ -46,18 +46,26 @@ func (c *Driver) collectKPIMetrics(metrics *controller.Metrics) error {
 
 	postsCount := int64(0)
 	lastPostDate := int64(0)
+	lastChannelDate := int64(0)
 
 	for _, channel := range channels {
-		postsCount += channel.TotalMsgCount
+		if channel != nil {
+			postsCount += channel.TotalMsgCount
 
-		if channel.LastPostAt > lastPostDate {
-			lastPostDate = channel.LastPostAt
+			if channel.LastPostAt > lastPostDate {
+				lastPostDate = channel.LastPostAt
+			}
+
+			if channel.CreateAt > lastChannelDate {
+				lastChannelDate = channel.CreateAt
+			}
 		}
 	}
 
 	metrics.KPIPostsCount = postsCount
 	metrics.KPILastPostDate = lastPostDate
-	metrics.KPIChannelsCount = int64(len(channels))
+	metrics.KPIChannelsLastCreationDate = lastChannelDate
+	metrics.KPIChannelsCount = channelsCountResp
 
 	return nil
 }
