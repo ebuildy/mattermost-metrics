@@ -2,12 +2,13 @@ package mattermost
 
 import (
 	"fmt"
+	"net/http"
+	"testing"
+
 	"github.com/ebuildy/mattermost-plugin-minotor/server/controller"
 	"github.com/ebuildy/mattermost-plugin-minotor/server/logger"
 	"github.com/jarcoal/httpmock"
 	"github.com/stretchr/testify/assert"
-	"net/http"
-	"testing"
 )
 
 const (
@@ -119,7 +120,7 @@ func TestDriver_collectKPIMetrics(t *testing.T) {
 			name: "8 channels, no pagination",
 			want: controller.Metrics{KPILastPostDate: 1734186913838, KPIPostsCount: 88, KPIChannelsCount: 8, KPIChannelsLastCreationDate: 1733941707169},
 			apiMockResponse: func(req *http.Request) (*http.Response, error) {
-				var channels []any = make([]any, 8)
+				var channels = make([]any, 8)
 
 				for i := 0; i < 8; i++ {
 					channel := map[string]any{
@@ -157,16 +158,16 @@ func TestDriver_collectKPIMetrics(t *testing.T) {
 				return resp, nil
 			},
 		},
-		//{
+		// {
 		//	name:            "200 channels, must paginate",
 		//	want:            controller.Metrics{KPILastPostDate: 1734186913838, KPIPostsCount: 1, KPIChannelsCount: 1, KPIChannelsLastCreationDate: 1733941707169},
 		//	apiMockResponse: httpmock.NewStringResponder(200, `{"ActiveSearchBackend": "database","status": "err", "filestore_status": "err", "database_status": "OK"}`),
-		//},
-		//{
+		// },
+		// {
 		//	name:            "API send a 500 error",
 		//	want:            controller.Metrics{KPILastPostDate: 1734186913838, KPIPostsCount: 1, KPIChannelsCount: 1, KPIChannelsLastCreationDate: 1733941707169},
 		//	apiMockResponse: httpmock.NewStringResponder(500, `{"error":"unexpected error"`),
-		//},
+		// },
 	}
 
 	c := NewDriver(logger.NewFakeLogger(), mattermostEndpointURL, "")

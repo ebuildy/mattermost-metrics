@@ -15,7 +15,7 @@ type Configuration struct {
 	// BotUserID used to post messages.
 	BotUserID string
 
-	EnableKPI    bool   `json:"enablekpi"`
+	EnableKPI     bool   `json:"enablekpi"`
 	MetricsPrefix string `json:"metricsprefix"`
 }
 

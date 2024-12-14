@@ -1,14 +1,14 @@
 package exporter
 
 import (
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/url"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestMetrics_HTTPHandler(t *testing.T) {
-
 	tests := []struct {
 		name       string
 		assertFunc func(t *testing.T, body string)
@@ -34,7 +34,7 @@ func TestMetrics_HTTPHandler(t *testing.T) {
 		},
 	}
 
-	//o.UsageUsersCountSet(0).UsagePostsCountSet(10)
+	// o.UsageUsersCountSet(0).UsagePostsCountSet(10)
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

@@ -3,6 +3,7 @@ package mattermost
 import (
 	"context"
 	"fmt"
+
 	"github.com/ebuildy/mattermost-plugin-minotor/server/controller"
 	"github.com/ebuildy/mattermost-plugin-minotor/server/logger"
 
@@ -31,7 +32,7 @@ func (c *Driver) CollectMetrics(metrics *controller.Metrics) error {
 	return nil
 }
 
-func (c *Driver) collectKPIMetrics(metrics *controller.Metrics) error {
+func (c *Driver) collectKPIMetrics(metrics *controller.Metrics) {
 	ctx := context.Background()
 
 	var channels []*model.ChannelWithTeamData
@@ -66,26 +67,22 @@ func (c *Driver) collectKPIMetrics(metrics *controller.Metrics) error {
 	metrics.KPILastPostDate = lastPostDate
 	metrics.KPIChannelsLastCreationDate = lastChannelDate
 	metrics.KPIChannelsCount = channelsCountResp
-
-	return nil
 }
 
-func (c *Driver) collectMetricsSystem(metrics *controller.Metrics) error {
+func (c *Driver) collectMetricsSystem(metrics *controller.Metrics) {
 	ctx := context.Background()
 
 	pingResp, _, err := c.client.GetPingWithOptions(ctx, model.SystemPingOptions{FullStatus: true})
 	if err != nil {
-		return err
+		c.logger.Error(fmt.Sprintf("failed to get system ping: %s", err))
 	}
 
 	metrics.SystemHealth = pingResp["status"] == "OK"
 	metrics.SystemHealthDatabase = pingResp["database_status"] == "OK"
 	metrics.SystemHealthFilestore = pingResp["filestore_status"] == "OK"
-
-	return nil
 }
 
-func (c *Driver) collectMetricsUsage(metrics *controller.Metrics) error {
+func (c *Driver) collectMetricsUsage(metrics *controller.Metrics) {
 	ctx := context.Background()
 
 	if postUsage, _, err := c.client.GetPostsUsage(ctx); err != nil {
@@ -108,6 +105,4 @@ func (c *Driver) collectMetricsUsage(metrics *controller.Metrics) error {
 	} else {
 		metrics.UsageStorage = storageUsage.Bytes
 	}
-
-	return nil
 }

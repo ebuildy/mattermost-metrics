@@ -1,8 +1,9 @@
 package controller
 
 import (
-	"github.com/ebuildy/mattermost-plugin-minotor/server/logger"
 	"net/http"
+
+	"github.com/ebuildy/mattermost-plugin-minotor/server/logger"
 )
 
 type Controller struct {
@@ -37,7 +38,6 @@ func NewCollector(logger logger.Logger, collector MetricsCollector, exporter Met
 }
 
 func (c *Controller) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-
 	metricsData := &Metrics{}
 
 	err := c.collector.CollectMetrics(metricsData)

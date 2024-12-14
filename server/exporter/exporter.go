@@ -1,9 +1,10 @@
 package exporter
 
 import (
+	"net/http"
+
 	"github.com/ebuildy/mattermost-plugin-minotor/server/controller"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"net/http"
 
 	"github.com/prometheus/client_golang/prometheus"
 )
@@ -30,7 +31,7 @@ type metrics struct {
 func NewExporter() *Exporter {
 	reg := prometheus.NewRegistry()
 
-	//reg.MustRegister(
+	// reg.MustRegister(
 	//	controller.NewGoCollector(),
 	//	controller.NewProcessCollector(controller.ProcessCollectorOpts{}),
 	//)
