@@ -1,16 +1,17 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"sync"
 
-	"github.com/pkg/errors"
 	"github.com/gorilla/mux"
-	// "github.com/sirupsen/logrus"
+	"github.com/pkg/errors"
 
-	"github.com/ebuildy/mattermost-plugin-minotor/server/api"
 	"github.com/ebuildy/mattermost-plugin-minotor/server/config"
-	"github.com/ebuildy/mattermost-plugin-minotor/server/registry"
+	"github.com/ebuildy/mattermost-plugin-minotor/server/controller"
+	"github.com/ebuildy/mattermost-plugin-minotor/server/exporter"
+	"github.com/ebuildy/mattermost-plugin-minotor/server/mattermost"
 
 	"github.com/mattermost/mattermost/server/public/model"
 	"github.com/mattermost/mattermost/server/public/plugin"
@@ -28,32 +29,27 @@ type Plugin struct {
 	// setConfiguration for usage.
 	configuration *configuration
 
-	handler              *api.Handler
-	config               *config.ServiceImpl
+	exporter  *exporter.Exporter
+	config    *config.ServiceImpl
+	driver    *mattermost.Driver
+	collector *controller.Controller
 
 	router *mux.Router
 }
 
-// ServeHTTP demonstrates a plugin that handles HTTP requests by greeting the world.
 func (p *Plugin) ServeHTTP(c *plugin.Context, w http.ResponseWriter, r *http.Request) {
-	// p.handler.ServeHTTP(w, r)
 	p.router.ServeHTTP(w, r)
 }
 
-
-// OnActivate Called when this plugin is activated.
 func (p *Plugin) OnActivate() error {
 	pluginAPIClient := pluginapi.NewClient(p.API, p.Driver)
 
 	p.config = config.NewConfigService(pluginAPIClient, manifest)
-	p.handler = api.NewHandler(pluginAPIClient, p.config)
-
-	// logger := logrus.StandardLogger()
 
 	botID, err := pluginAPIClient.Bot.EnsureBot(&model.Bot{
 		Username:    "minotor",
 		DisplayName: "Minotor",
-		Description: "Minotor bot to expose metrics.",
+		Description: "Minotor bot to expose exporter.",
 		OwnerId:     "minotor",
 	},
 		pluginapi.ProfileImagePath("assets/logo.png"),
@@ -61,6 +57,14 @@ func (p *Plugin) OnActivate() error {
 	if err != nil {
 		return errors.Wrapf(err, "failed to ensure bot")
 	}
+
+	botUser, err := pluginAPIClient.User.UpdateRoles(botID, model.SystemAdminRoleId)
+
+	if err != nil {
+		return err
+	}
+
+	pluginAPIClient.Log.Info(fmt.Sprintf("Bot user %s %s with roles %s", botUser.Username, botUser.Id, botUser.Roles))
 
 	err = p.config.UpdateConfiguration(func(c *config.Configuration) {
 		c.BotUserID = botID
@@ -70,10 +74,11 @@ func (p *Plugin) OnActivate() error {
 	}
 
 	p.router = mux.NewRouter()
+	p.driver = mattermost.NewDriver(&pluginAPIClient.Log, "http://localhost:8065", botID)
+	p.exporter = exporter.NewExporter()
+	p.collector = controller.NewCollector(&pluginAPIClient.Log, p.driver, p.exporter)
 
-	registry := registry.NewRegistry()
-
-	p.router.Handle("/metrics", registry.HandleHTTP())
+	p.router.Handle("/metrics", p.collector)
 
 	return nil
 }

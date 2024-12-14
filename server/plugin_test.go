@@ -6,14 +6,22 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/ebuildy/mattermost-plugin-minotor/server/exporter"
 )
 
 func TestServeHTTP(t *testing.T) {
 	assert := assert.New(t)
-	plugin := Plugin{}
+	plugin := Plugin{
+		router:   mux.NewRouter(),
+		registry: exporter.NewRegistry(),
+	}
 	w := httptest.NewRecorder()
-	r := httptest.NewRequest(http.MethodGet, "/", nil)
+	r := httptest.NewRequest(http.MethodGet, "/exporter", nil)
+
+	plugin.router.Handle("/metrics", plugin.registry.HandleHTTP())
 
 	plugin.ServeHTTP(nil, w, r)
 
@@ -24,5 +32,5 @@ func TestServeHTTP(t *testing.T) {
 	assert.Nil(err)
 	bodyString := string(bodyBytes)
 
-	assert.Equal("Hello, world!", bodyString)
+	assert.Contains(bodyString, "go_gc_duration_seconds")
 }
