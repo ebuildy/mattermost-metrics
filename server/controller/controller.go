@@ -12,6 +12,7 @@ type Controller struct {
 	exporter  MetricsExporter
 }
 
+// Metrics represents metrics data between collector and exporter
 type Metrics struct {
 	UsagePostsCount, UsageUsersCount, UsageStorage int64
 
@@ -37,6 +38,11 @@ func NewCollector(logger logger.Logger, collector MetricsCollector, exporter Met
 	}
 }
 
+// ServeHTTP is called when /metrics is called
+//
+// -> Collect metrics data
+// -> Feed exporter
+// -> Render exporter
 func (c *Controller) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	metricsData := &Metrics{}
 

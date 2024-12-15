@@ -2,6 +2,7 @@ package logger
 
 import "fmt"
 
+// Logger define a simple logger, implemented by pluginAPIClient.Log
 type Logger interface {
 	Debug(message string, keyValuePairs ...interface{})
 	Info(message string, keyValuePairs ...interface{})
@@ -9,6 +10,7 @@ type Logger interface {
 	Error(message string, keyValuePairs ...interface{})
 }
 
+// fakeLogger is used for tests
 type fakeLogger struct{}
 
 func NewFakeLogger() Logger {

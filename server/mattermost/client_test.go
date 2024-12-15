@@ -40,7 +40,7 @@ func TestDriver_collectMetricsUsaget(t *testing.T) {
 		},
 	}
 
-	c := NewDriver(logger.NewFakeLogger(), mattermostEndpointURL, "")
+	c := NewDriver(logger.NewFakeLogger(), mattermostEndpointURL)
 
 	for _, tt := range tests {
 		httpmock.RegisterResponder("GET", fmt.Sprintf("%s/api/v4/usage/posts", mattermostEndpointURL), tt.apiMockResponse)
@@ -78,7 +78,7 @@ func TestDriver_collectMetricsSystem(t *testing.T) {
 		},
 	}
 
-	c := NewDriver(logger.NewFakeLogger(), mattermostEndpointURL, "")
+	c := NewDriver(logger.NewFakeLogger(), mattermostEndpointURL)
 
 	for _, tt := range tests {
 		httpmock.RegisterResponder("GET", fmt.Sprintf("%s/api/v4/system/ping?get_server_status=true&use_rest_semantics=false", mattermostEndpointURL), tt.apiMockResponse)
@@ -170,7 +170,7 @@ func TestDriver_collectKPIMetrics(t *testing.T) {
 		// },
 	}
 
-	c := NewDriver(logger.NewFakeLogger(), mattermostEndpointURL, "")
+	c := NewDriver(logger.NewFakeLogger(), mattermostEndpointURL)
 
 	for _, tt := range tests {
 		httpmock.RegisterResponder("GET", fmt.Sprintf("%s/api/v4/channels?page=0&per_page=100&include_total_count=true", mattermostEndpointURL), tt.apiMockResponse)

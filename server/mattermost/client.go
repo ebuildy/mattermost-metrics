@@ -3,7 +3,6 @@ package mattermost
 import (
 	"context"
 	"fmt"
-
 	"github.com/ebuildy/mattermost-plugin-minotor/server/controller"
 	"github.com/ebuildy/mattermost-plugin-minotor/server/logger"
 
@@ -13,17 +12,31 @@ import (
 type Driver struct {
 	logger logger.Logger
 	client *model.Client4
-	botID  string
 }
 
-func NewDriver(logger logger.Logger, endpointURL string, botID string) *Driver {
+func NewAuthenticatedDriver(logger logger.Logger, accessToken string, endpointURL string) *Driver {
+	client := model.NewAPIv4Client(endpointURL)
+
+	client.SetToken(accessToken)
+
 	return &Driver{
 		logger: logger,
-		botID:  botID,
-		client: model.NewAPIv4Client(endpointURL),
+		client: client,
 	}
 }
 
+func NewDriver(logger logger.Logger, endpointURL string) *Driver {
+	client := model.NewAPIv4Client(endpointURL)
+
+	return &Driver{
+		logger: logger,
+		client: client,
+	}
+}
+
+// CollectMetrics is the public API to run metrics harvest
+//
+// This call all sub metrics collectors
 func (c *Driver) CollectMetrics(metrics *controller.Metrics) error {
 	c.collectMetricsUsage(metrics)
 	c.collectMetricsSystem(metrics)
