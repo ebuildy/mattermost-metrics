@@ -1,57 +1,55 @@
-# Plugin Starter Template
+# Mattermost plugin minotor
 
 [![Build Status](https://github.com/mattermost/mattermost-plugin-starter-template/actions/workflows/ci.yml/badge.svg)](https://github.com/mattermost/mattermost-plugin-starter-template/actions/workflows/ci.yml)
 [![E2E Status](https://github.com/mattermost/mattermost-plugin-starter-template/actions/workflows/e2e.yml/badge.svg)](https://github.com/mattermost/mattermost-plugin-starter-template/actions/workflows/e2e.yml)
 
-This plugin serves as a starting point for writing a Mattermost plugin. Feel free to base your own plugin off this repository.
+Export some Mattermost metrics for Prometheus:
 
-To learn more about plugins, see [our plugin documentation](https://developers.mattermost.com/extend/plugins/).
-
-This template requires node v16 and npm v8. You can download and install nvm to manage your node versions by following the instructions [here](https://github.com/nvm-sh/nvm). Once you've setup the project simply run `nvm i` within the root folder to use the suggested version of node.
+```
+# HELP mattermost_kpi_channels_total Total number of channels
+# TYPE mattermost_kpi_channels_total gauge
+mattermost_kpi_channels_total 2
+# HELP mattermost_kpi_last_post_date Timestamp of last post date
+# TYPE mattermost_kpi_last_post_date gauge
+mattermost_kpi_last_post_date 1.734186913838e+12
+# HELP mattermost_kpi_posts_total Total number of posts
+# TYPE mattermost_kpi_posts_total gauge
+mattermost_kpi_posts_total 39
+# HELP mattermost_system_database_status Database component status
+# TYPE mattermost_system_database_status gauge
+mattermost_system_database_status 1
+# HELP mattermost_system_filestore_status Filestore component status
+# TYPE mattermost_system_filestore_status gauge
+mattermost_system_filestore_status 1
+# HELP mattermost_system_status Global status
+# TYPE mattermost_system_status gauge
+mattermost_system_status 1
+# HELP mattermost_usage_posts_total Total number of posts
+# TYPE mattermost_usage_posts_total gauge
+mattermost_usage_posts_total{group="mattermost"} 40
+# HELP mattermost_usage_storage_bytes Storage usage in bytes
+# TYPE mattermost_usage_storage_bytes gauge
+mattermost_usage_storage_bytes 6e+07
+# HELP mattermost_usage_users_total Total number of users
+# TYPE mattermost_usage_users_total gauge
+mattermost_usage_users_total 7
+# HELP promhttp_metric_handler_errors_total Total number of internal errors encountered by the promhttp metric handler.
+# TYPE promhttp_metric_handler_errors_total counter
+promhttp_metric_handler_errors_total{cause="encoding"} 0
+promhttp_metric_handler_errors_total{cause="gathering"} 0
+```
 
 ## Getting Started
-Use GitHub's template feature to make a copy of this repository by clicking the "Use this template" button.
 
-Alternatively shallow clone the repository matching your plugin name:
-```
-git clone --depth 1 https://github.com/mattermost/mattermost-plugin-starter-template com.example.my-plugin
-```
+### Installation
 
-Note that this project uses [Go modules](https://github.com/golang/go/wiki/Modules). Be sure to locate the project outside of `$GOPATH`.
+Download and install the plugin <https://developers.mattermost.com/integrate/plugins/using-and-managing-plugins/>
 
-Edit the following files:
-1. `plugin.json` with your `id`, `name`, and `description`:
-```json
-{
-    "id": "com.example.my-plugin",
-    "name": "My Plugin",
-    "description": "A plugin to enhance Mattermost."
-}
-```
+### Usage
 
-2. `go.mod` with your Go module path, following the `<hosting-site>/<repository>/<module>` convention:
-```
-module github.com/example/my-plugin
-```
+Configure your Prometheus or Grafana alloy to scrap endpoint: `/plugins/org.ebuildy.plugin-minotor/metrics`
 
-3. `.golangci.yml` with your Go module path:
-```yml
-linters-settings:
-  # [...]
-  goimports:
-    local-prefixes: github.com/example/my-plugin
-```
-
-Build your plugin:
-```
-make
-```
-
-This will produce a single plugin file (with support for multiple architectures) for upload to your Mattermost server:
-
-```
-dist/com.example.my-plugin.tar.gz
-```
+<!> There is no authentication, you must protect this endpoint from public access <!>
 
 ## Development
 
@@ -187,6 +185,3 @@ if appErr := p.API.SetProfileImage(userID, profileImage); appErr != nil {
     return errors.Wrap(err, "failed to set profile image")
 }
 ```
-
-### How do I build the plugin with unminified JavaScript?
-Setting the `MM_DEBUG` environment variable will invoke the debug builds. The simplist way to do this is to simply include this variable in your calls to `make` (e.g. `make dist MM_DEBUG=1`).
