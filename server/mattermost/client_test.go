@@ -158,16 +158,53 @@ func TestDriver_collectKPIMetrics(t *testing.T) {
 				return resp, nil
 			},
 		},
-		// {
-		//	name:            "200 channels, must paginate",
-		//	want:            controller.Metrics{KPILastPostDate: 1734186913838, KPIPostsCount: 1, KPIChannelsCount: 1, KPIChannelsLastCreationDate: 1733941707169},
-		//	apiMockResponse: httpmock.NewStringResponder(200, `{"ActiveSearchBackend": "database","status": "err", "filestore_status": "err", "database_status": "OK"}`),
-		// },
-		// {
-		//	name:            "API send a 500 error",
-		//	want:            controller.Metrics{KPILastPostDate: 1734186913838, KPIPostsCount: 1, KPIChannelsCount: 1, KPIChannelsLastCreationDate: 1733941707169},
-		//	apiMockResponse: httpmock.NewStringResponder(500, `{"error":"unexpected error"`),
-		// },
+		{
+			name: "350 channels, must paginate",
+			want: controller.Metrics{KPILastPostDate: 1734186913837, KPIPostsCount: 1100, KPIChannelsCount: 350, KPIChannelsLastCreationDate: 1733941707168},
+			apiMockResponse: func(req *http.Request) (*http.Response, error) {
+				var channels = make([]any, 100)
+
+				for i := 0; i < 100; i++ {
+					channel := map[string]any{
+						"id":                   fmt.Sprintf("%daqj7ttnji8hjjgrcgfrfndyyo", i),
+						"create_at":            1733941707169 - 100 + i,
+						"update_at":            1733941707169 + i,
+						"delete_at":            0,
+						"team_id":              "91fsqtw98388tbt8ka5d1fgzhy",
+						"type":                 "O",
+						"display_name":         "Off-Topic",
+						"name":                 "off-topic",
+						"header":               "",
+						"purpose":              "",
+						"last_post_at":         1734186913838 - 100 + i,
+						"total_msg_count":      11,
+						"extra_update_at":      0,
+						"creator_id":           "",
+						"total_msg_count_root": 5,
+						"last_root_post_at":    1734186913838 - 100 + i,
+						"team_display_name":    "test",
+						"team_name":            "test",
+						"team_update_at":       1733941707151 + i,
+					}
+
+					channels[i] = channel
+				}
+
+				resp, err := httpmock.NewJsonResponse(200, map[string]interface{}{
+					"channels":    channels,
+					"total_count": 350,
+				})
+				if err != nil {
+					return httpmock.NewStringResponse(500, ""), nil
+				}
+				return resp, nil
+			},
+		},
+		{
+			name:            "API send a 500 error",
+			want:            controller.Metrics{KPILastPostDate: 0, KPIPostsCount: 0, KPIChannelsCount: 0, KPIChannelsLastCreationDate: 0},
+			apiMockResponse: httpmock.NewStringResponder(500, `{"error":"unexpected error"`),
+		},
 	}
 
 	c := NewDriver(logger.NewFakeLogger(), mattermostEndpointURL)

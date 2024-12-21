@@ -28,100 +28,41 @@ type metrics struct {
 	kpiPostsCount, kpiChannelsCount, kpiLastPostDate          prometheus.Gauge
 }
 
-func NewExporter() *Exporter {
-	reg := prometheus.NewRegistry()
+func newSystemGauge(reg *prometheus.Registry, subsystem, name, help string) prometheus.Gauge {
+	g := prometheus.NewGauge(prometheus.GaugeOpts{
+		Namespace:   MetricsNamespace,
+		Subsystem:   subsystem,
+		Name:        name,
+		Help:        help,
+		ConstLabels: nil,
+	})
 
-	// reg.MustRegister(
-	//	controller.NewGoCollector(),
-	//	controller.NewProcessCollector(controller.ProcessCollectorOpts{}),
-	//)
+	reg.MustRegister(g)
+
+	return g
+}
+
+func NewExporter() *Exporter {
+	registry := prometheus.NewRegistry()
 
 	metrics := &metrics{
-		usagePostCount: prometheus.NewGauge(prometheus.GaugeOpts{
-			Namespace:   MetricsNamespace,
-			Subsystem:   MetricsSubsystemUsage,
-			Name:        "posts_total",
-			Help:        "Total number of posts",
-			ConstLabels: map[string]string{"group": "mattermost"},
-		}),
-		usageUsersCount: prometheus.NewGauge(prometheus.GaugeOpts{
-			Namespace:   MetricsNamespace,
-			Subsystem:   MetricsSubsystemUsage,
-			Name:        "users_total",
-			Help:        "Total number of users",
-			ConstLabels: nil,
-		}),
-		usageStorage: prometheus.NewGauge(prometheus.GaugeOpts{
-			Namespace:   MetricsNamespace,
-			Subsystem:   MetricsSubsystemUsage,
-			Name:        "storage_bytes",
-			Help:        "Storage usage in bytes",
-			ConstLabels: nil,
-		}),
-
-		systemHealth: prometheus.NewGauge(prometheus.GaugeOpts{
-			Namespace:   MetricsNamespace,
-			Subsystem:   MetricsSubsystemSystem,
-			Name:        "status",
-			Help:        "Global status",
-			ConstLabels: nil,
-		}),
-		systemDatabaseHealth: prometheus.NewGauge(prometheus.GaugeOpts{
-			Namespace:   MetricsNamespace,
-			Subsystem:   MetricsSubsystemSystem,
-			Name:        "database_status",
-			Help:        "Database component status",
-			ConstLabels: nil,
-		}),
-		systemFilestoreHealth: prometheus.NewGauge(prometheus.GaugeOpts{
-			Namespace:   MetricsNamespace,
-			Subsystem:   MetricsSubsystemSystem,
-			Name:        "filestore_status",
-			Help:        "Filestore component status",
-			ConstLabels: nil,
-		}),
-
-		kpiPostsCount: prometheus.NewGauge(prometheus.GaugeOpts{
-			Namespace:   MetricsNamespace,
-			Subsystem:   MetricsSubsystemKPI,
-			Name:        "posts_total",
-			Help:        "Total number of posts",
-			ConstLabels: nil,
-		}),
-		kpiChannelsCount: prometheus.NewGauge(prometheus.GaugeOpts{
-			Namespace:   MetricsNamespace,
-			Subsystem:   MetricsSubsystemKPI,
-			Name:        "channels_total",
-			Help:        "Total number of channels",
-			ConstLabels: nil,
-		}),
-		kpiLastPostDate: prometheus.NewGauge(prometheus.GaugeOpts{
-			Namespace:   MetricsNamespace,
-			Subsystem:   MetricsSubsystemKPI,
-			Name:        "last_post_date",
-			Help:        "Timestamp of last post date",
-			ConstLabels: nil,
-		}),
+		usagePostCount:        newSystemGauge(registry, MetricsSubsystemUsage, "posts_total", "Total number of posts"),
+		usageUsersCount:       newSystemGauge(registry, MetricsSubsystemUsage, "users_total", "Total number of users"),
+		usageStorage:          newSystemGauge(registry, MetricsSubsystemUsage, "storage_bytes", "Storage usage in bytes"),
+		systemHealth:          newSystemGauge(registry, MetricsSubsystemUsage, "status", "Global status"),
+		systemDatabaseHealth:  newSystemGauge(registry, MetricsSubsystemSystem, "database_status", "Database component status"),
+		systemFilestoreHealth: newSystemGauge(registry, MetricsSubsystemSystem, "filestore_status", "Filestore component status"),
+		kpiPostsCount:         newSystemGauge(registry, MetricsSubsystemKPI, "posts_total", "Total number of posts"),
+		kpiChannelsCount:      newSystemGauge(registry, MetricsSubsystemKPI, "channels_total", "Total number of channels"),
+		kpiLastPostDate:       newSystemGauge(registry, MetricsSubsystemKPI, "last_post_date", "Timestamp of last post date"),
 	}
 
-	reg.MustRegister(metrics.usagePostCount)
-	reg.MustRegister(metrics.usageUsersCount)
-	reg.MustRegister(metrics.usageStorage)
-
-	reg.MustRegister(metrics.systemHealth)
-	reg.MustRegister(metrics.systemDatabaseHealth)
-	reg.MustRegister(metrics.systemFilestoreHealth)
-
-	reg.MustRegister(metrics.kpiLastPostDate)
-	reg.MustRegister(metrics.kpiPostsCount)
-	reg.MustRegister(metrics.kpiChannelsCount)
-
 	return &Exporter{
-		reg,
+		registry,
 		metrics,
-		promhttp.HandlerFor(reg, promhttp.HandlerOpts{
+		promhttp.HandlerFor(registry, promhttp.HandlerOpts{
 			EnableOpenMetrics: false,
-			Registry:          reg,
+			Registry:          registry,
 		}),
 	}
 }
