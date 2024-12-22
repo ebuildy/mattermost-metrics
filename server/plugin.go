@@ -1,18 +1,17 @@
 package main
 
 import (
-	"fmt"
-	"github.com/ebuildy/mattermost-plugin-minotor/server/internal/adapters/collector"
-	"github.com/ebuildy/mattermost-plugin-minotor/server/internal/adapters/exporter"
+	"github.com/ebuildy/mattermost-plugin-minotor/server/internal/adapters/collector/mattermost"
+	"github.com/ebuildy/mattermost-plugin-minotor/server/internal/adapters/exporter/prometheus"
 	"github.com/ebuildy/mattermost-plugin-minotor/server/internal/adapters/handler"
+	"github.com/ebuildy/mattermost-plugin-minotor/server/internal/adapters/services/mattermost_gateway"
+	"github.com/ebuildy/mattermost-plugin-minotor/server/internal/core/ports"
 	"net/http"
 	"sync"
 
-	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 
 	"github.com/ebuildy/mattermost-plugin-minotor/server/config"
-	"github.com/mattermost/mattermost/server/public/model"
 	"github.com/mattermost/mattermost/server/public/plugin"
 	"github.com/mattermost/mattermost/server/public/pluginapi"
 )
@@ -23,8 +22,6 @@ type Plugin struct {
 
 	pluginAPIClient *pluginapi.Client
 
-	bot *model.Bot
-
 	// configurationLock synchronizes access to the configuration.
 	configurationLock sync.RWMutex
 
@@ -32,14 +29,12 @@ type Plugin struct {
 	// setConfiguration for usage.
 	configuration *configuration
 
-	exporter       *exporter.Exporter
-	config         *config.ServiceImpl
-	driver         *collector.Driver
-	metricsHandler *handler.MetricsHandler
+	exporter            *prometheus.Exporter
+	config              *config.ServiceImpl
+	mattermostCollector *mattermost.Collector
+	metricsHandler      *handler.MetricsHandler
 
-	router *mux.Router
-
-	apiAccessTokenId *string
+	mattermostGatewayClient *mattermost_gateway.Client
 }
 
 func (p *Plugin) ServeMetrics(c *plugin.Context, w http.ResponseWriter, r *http.Request) {
@@ -53,50 +48,25 @@ func (p *Plugin) ServeMetrics(c *plugin.Context, w http.ResponseWriter, r *http.
 func (p *Plugin) OnActivate() error {
 	p.pluginAPIClient = pluginapi.NewClient(p.API, p.Driver)
 	p.config = config.NewConfigService(p.pluginAPIClient, manifest)
-	p.bot = &model.Bot{
-		Username:    "minotor",
-		DisplayName: "Minotor",
-		Description: "Minotor bot to expose exporter.",
-		OwnerId:     "minotor",
-	}
 
-	botID, err := p.pluginAPIClient.Bot.EnsureBot(p.bot,
-		pluginapi.ProfileImagePath("assets/logo.png"),
-	)
-	if err != nil {
-		return errors.Wrapf(err, "failed to ensure bot")
-	}
+	logger := &p.pluginAPIClient.Log
 
-	p.bot.UserId = botID
-
-	botUser, err := p.pluginAPIClient.User.UpdateRoles(botID, model.SystemAdminRoleId)
+	mattermostGatewayClient, err := mattermost_gateway.NewClient(p.pluginAPIClient)
 
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "failed to create mattermost gateway client")
 	}
-
-	p.pluginAPIClient.Log.Info(fmt.Sprintf("Bot user %s %s with roles %s", botUser.Username, botUser.Id, botUser.Roles))
 
 	err = p.config.UpdateConfiguration(func(c *config.Configuration) {
-		c.BotUserID = botID
+		c.BotUserID = mattermostGatewayClient.Bot.UserId
 	})
 	if err != nil {
 		return errors.Wrapf(err, "failed save bot to config")
 	}
 
-	accessTokenResp, err := p.pluginAPIClient.User.CreateAccessToken(botID, "minotor api proxy")
-
-	if err != nil {
-		return errors.Wrapf(err, "Error creating access token")
-	}
-
-	p.apiAccessTokenId = &accessTokenResp.Id
-	p.router = mux.NewRouter()
-	p.driver = collector.NewAuthenticatedAPICollector(&p.pluginAPIClient.Log, p.pluginAPIClient, accessTokenResp.Token, "http://localhost:8065")
-	p.exporter = exporter.NewExporter()
-	p.metricsHandler = handler.NewMetricsHandler(&p.pluginAPIClient.Log, p.driver, p.exporter)
-
-	//p.router.HandleFunc("/metrics", metricsHandler.ServeMetrics)
+	p.mattermostCollector = mattermost.NewCollector(logger, mattermostGatewayClient)
+	p.exporter = prometheus.NewExporter()
+	p.metricsHandler = handler.NewMetricsHandler(logger, []ports.MetricsCollector{p.mattermostCollector}, p.exporter)
 
 	return nil
 }
@@ -105,8 +75,8 @@ func (p *Plugin) OnActivate() error {
 //
 // -> revoke Mattermost API access token
 func (p *Plugin) OnDeactivate() error {
-	if p.apiAccessTokenId != nil {
-		err := p.pluginAPIClient.User.RevokeAccessToken(*p.apiAccessTokenId)
+	if p.mattermostGatewayClient != nil && p.mattermostGatewayClient.APIUserAccessToken != nil {
+		err := p.pluginAPIClient.User.RevokeAccessToken(p.mattermostGatewayClient.APIUserAccessToken.Id)
 		if err != nil {
 			p.pluginAPIClient.Log.Warn("Failed to revoke access token", "error", err)
 		}

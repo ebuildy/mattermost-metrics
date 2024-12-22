@@ -11,5 +11,9 @@ type MetricsCollector interface {
 
 type MetricsExporter interface {
 	ExportMetrics(metrics *domain.MetricsData) error
+}
+
+type MetricsHandler interface {
+	MetricsExporter
 	ServeMetrics(w http.ResponseWriter, r *http.Request)
 }

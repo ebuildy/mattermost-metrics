@@ -8,11 +8,11 @@ import (
 
 type MetricsHandler struct {
 	logger    ports.Logger
-	collector ports.MetricsCollector
-	exporter  ports.MetricsExporter
+	collector []ports.MetricsCollector
+	exporter  ports.MetricsHandler
 }
 
-func NewMetricsHandler(logger ports.Logger, collector ports.MetricsCollector, exporter ports.MetricsExporter) *MetricsHandler {
+func NewMetricsHandler(logger ports.Logger, collector []ports.MetricsCollector, exporter ports.MetricsHandler) *MetricsHandler {
 	return &MetricsHandler{
 		logger:    logger,
 		collector: collector,
@@ -28,12 +28,15 @@ func NewMetricsHandler(logger ports.Logger, collector ports.MetricsCollector, ex
 func (c *MetricsHandler) ServeMetrics(w http.ResponseWriter, r *http.Request) {
 	metricsData := &domain.MetricsData{}
 
-	err := c.collector.CollectMetrics(metricsData)
-	if err != nil {
-		return
+	for _, collector := range c.collector {
+		err := collector.CollectMetrics(metricsData)
+
+		if err != nil {
+			c.logger.Error("Error while collecting metrics", "error", err)
+		}
 	}
 
-	err = c.exporter.ExportMetrics(metricsData)
+	err := c.exporter.ExportMetrics(metricsData)
 	if err != nil {
 		return
 	}

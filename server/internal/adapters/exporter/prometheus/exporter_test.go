@@ -1,4 +1,4 @@
-package exporter
+package prometheus
 
 import (
 	"net/http"

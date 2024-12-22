@@ -40,70 +40,58 @@ func NewAPICollector(logger ports.Logger, endpointURL string) *Driver {
 //
 // This call all sub metrics collectors
 func (c *Driver) CollectMetrics(metrics *domain.MetricsData) error {
-	ctx := context.Background()
-
-	metrics.MattermostVersion = c.pluginAPIClient.System.GetServerVersion()
-	metrics.MattermostInstallationTime, _ = c.pluginAPIClient.System.GetSystemInstallDate()
-	metrics.SQLDriverName = *c.pluginAPIClient.Configuration.GetConfig().SqlSettings.DriverName
-
-	if c.pluginAPIClient.System.GetLicense() == nil {
-		metrics.MattermostEdition = "free"
-	} else {
-		metrics.MattermostEdition = "entreprise"
-	}
-
-	c.collectMetricsUsage(ctx, metrics)
-	c.collectMetricsSystem(ctx, metrics)
-	c.collectKPIMetrics(ctx, metrics)
+	//ctx := context.Background()
+	////
+	////c.collectMetricsUsage(ctx, metrics)
+	////c.collectMetricsSystem(ctx, metrics)
 
 	return nil
 }
 
-func (c *Driver) collectKPIMetrics(ctx context.Context, metrics *domain.MetricsData) {
-	var channels []*model.ChannelWithTeamData
+//func (c *Driver) collectKPIMetrics(ctx context.Context, metrics *domain.MetricsData) {
+//	var channels []*model.ChannelWithTeamData
+//
+//	channelsResp, channelsCountResp, _, err := c.client.GetAllChannelsWithCount(ctx, 0, 100, "1")
+//
+//	if err != nil {
+//		c.logger.Error(fmt.Sprintf("failed to get all channels: %s", err))
+//	}
+//
+//	channels = append(channels, channelsResp...)
+//
+//	postsCount := int64(0)
+//	lastPostDate := int64(0)
+//	lastChannelDate := int64(0)
+//
+//	for _, channel := range channels {
+//		if channel != nil {
+//			postsCount += channel.TotalMsgCount
+//
+//			if channel.LastPostAt > lastPostDate {
+//				lastPostDate = channel.LastPostAt
+//			}
+//
+//			if channel.CreateAt > lastChannelDate {
+//				lastChannelDate = channel.CreateAt
+//			}
+//		}
+//	}
+//
+//	metrics.KPIPostsCount = postsCount
+//	metrics.KPILastPostDate = lastPostDate
+//	metrics.KPIChannelsLastCreationDate = lastChannelDate
+//}
 
-	channelsResp, channelsCountResp, _, err := c.client.GetAllChannelsWithCount(ctx, 0, 100, "1")
-
-	if err != nil {
-		c.logger.Error(fmt.Sprintf("failed to get all channels: %s", err))
-	}
-
-	channels = append(channels, channelsResp...)
-
-	postsCount := int64(0)
-	lastPostDate := int64(0)
-	lastChannelDate := int64(0)
-
-	for _, channel := range channels {
-		if channel != nil {
-			postsCount += channel.TotalMsgCount
-
-			if channel.LastPostAt > lastPostDate {
-				lastPostDate = channel.LastPostAt
-			}
-
-			if channel.CreateAt > lastChannelDate {
-				lastChannelDate = channel.CreateAt
-			}
-		}
-	}
-
-	metrics.KPIPostsCount = postsCount
-	metrics.KPILastPostDate = lastPostDate
-	metrics.KPIChannelsLastCreationDate = lastChannelDate
-	metrics.KPIChannelsCount = channelsCountResp
-}
-
-func (c *Driver) collectMetricsSystem(ctx context.Context, metrics *domain.MetricsData) {
-	pingResp, _, err := c.client.GetPingWithOptions(ctx, model.SystemPingOptions{FullStatus: true})
-	if err != nil {
-		c.logger.Error(fmt.Sprintf("failed to get system ping: %s", err))
-	}
-
-	metrics.SystemHealth = pingResp["status"] == "OK"
-	metrics.SystemHealthDatabase = pingResp["database_status"] == "OK"
-	metrics.SystemHealthFilestore = pingResp["filestore_status"] == "OK"
-}
+//func (c *Driver) collectMetricsSystem(ctx context.Context, metrics *domain.MetricsData) {
+//	pingResp, _, err := c.client.GetPingWithOptions(ctx, model.SystemPingOptions{FullStatus: true})
+//	if err != nil {
+//		c.logger.Error(fmt.Sprintf("failed to get system ping: %s", err))
+//	}
+//
+//	metrics.SystemHealth = pingResp["status"] == "OK"
+//	metrics.SystemHealthDatabase = pingResp["database_status"] == "OK"
+//	metrics.SystemHealthFilestore = pingResp["filestore_status"] == "OK"
+//}
 
 func (c *Driver) collectMetricsUsage(ctx context.Context, metrics *domain.MetricsData) {
 	if postUsage, _, err := c.client.GetPostsUsage(ctx); err != nil {
