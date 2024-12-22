@@ -2,6 +2,9 @@ package main
 
 import (
 	"fmt"
+	"github.com/ebuildy/mattermost-plugin-minotor/server/internal/adapters/collector"
+	"github.com/ebuildy/mattermost-plugin-minotor/server/internal/adapters/exporter"
+	"github.com/ebuildy/mattermost-plugin-minotor/server/internal/adapters/handler"
 	"net/http"
 	"sync"
 
@@ -9,10 +12,6 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/ebuildy/mattermost-plugin-minotor/server/config"
-	"github.com/ebuildy/mattermost-plugin-minotor/server/controller"
-	"github.com/ebuildy/mattermost-plugin-minotor/server/exporter"
-	"github.com/ebuildy/mattermost-plugin-minotor/server/mattermost"
-
 	"github.com/mattermost/mattermost/server/public/model"
 	"github.com/mattermost/mattermost/server/public/plugin"
 	"github.com/mattermost/mattermost/server/public/pluginapi"
@@ -33,18 +32,18 @@ type Plugin struct {
 	// setConfiguration for usage.
 	configuration *configuration
 
-	exporter  *exporter.Exporter
-	config    *config.ServiceImpl
-	driver    *mattermost.Driver
-	collector *controller.Controller
+	exporter       *exporter.Exporter
+	config         *config.ServiceImpl
+	driver         *collector.Driver
+	metricsHandler *handler.MetricsHandler
 
 	router *mux.Router
 
 	apiAccessTokenId *string
 }
 
-func (p *Plugin) ServeHTTP(c *plugin.Context, w http.ResponseWriter, r *http.Request) {
-	p.router.ServeHTTP(w, r)
+func (p *Plugin) ServeMetrics(c *plugin.Context, w http.ResponseWriter, r *http.Request) {
+	p.metricsHandler.ServeMetrics(w, r)
 }
 
 // OnActivate is called when plugin is enabled
@@ -93,11 +92,11 @@ func (p *Plugin) OnActivate() error {
 
 	p.apiAccessTokenId = &accessTokenResp.Id
 	p.router = mux.NewRouter()
-	p.driver = mattermost.NewAuthenticatedDriver(&p.pluginAPIClient.Log, accessTokenResp.Token, "http://localhost:8065")
+	p.driver = collector.NewAuthenticatedDriver(&p.pluginAPIClient.Log, p.pluginAPIClient, accessTokenResp.Token, "http://localhost:8065")
 	p.exporter = exporter.NewExporter()
-	p.collector = controller.NewCollector(&p.pluginAPIClient.Log, p.driver, p.exporter)
+	p.metricsHandler = handler.NewMetricsHandler(&p.pluginAPIClient.Log, p.driver, p.exporter)
 
-	p.router.Handle("/metrics", p.collector)
+	//p.router.HandleFunc("/metrics", metricsHandler.ServeMetrics)
 
 	return nil
 }

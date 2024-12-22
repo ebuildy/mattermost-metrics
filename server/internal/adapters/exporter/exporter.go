@@ -1,9 +1,9 @@
 package exporter
 
 import (
+	"github.com/ebuildy/mattermost-plugin-minotor/server/internal/core/domain"
 	"net/http"
 
-	"github.com/ebuildy/mattermost-plugin-minotor/server/controller"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -23,6 +23,8 @@ type Exporter struct {
 }
 
 type metrics struct {
+	info                                                      *prometheus.GaugeVec
+	startTimeSeconds                                          prometheus.Gauge
 	usagePostCount, usageUsersCount, usageStorage             prometheus.Gauge
 	systemHealth, systemDatabaseHealth, systemFilestoreHealth prometheus.Gauge
 	kpiPostsCount, kpiChannelsCount, kpiLastPostDate          prometheus.Gauge
@@ -42,10 +44,26 @@ func newSystemGauge(reg *prometheus.Registry, subsystem, name, help string) prom
 	return g
 }
 
+func newSystemGaugeWithLabels(reg *prometheus.Registry, subsystem, name, help string, labels []string) *prometheus.GaugeVec {
+	g := prometheus.NewGaugeVec(prometheus.GaugeOpts{
+		Namespace:   MetricsNamespace,
+		Subsystem:   subsystem,
+		Name:        name,
+		Help:        help,
+		ConstLabels: nil,
+	}, labels)
+
+	reg.MustRegister(g)
+
+	return g
+}
+
 func NewExporter() *Exporter {
 	registry := prometheus.NewRegistry()
 
 	metrics := &metrics{
+		info:                  newSystemGaugeWithLabels(registry, MetricsSubsystemUsage, "info", "Mattermost server info", []string{"version", "edition", "sqldriver"}),
+		startTimeSeconds:      newSystemGauge(registry, MetricsSubsystemUsage, "start_time_seconds", "Start time of the process since unix epoch in seconds"),
 		usagePostCount:        newSystemGauge(registry, MetricsSubsystemUsage, "posts_total", "Total number of posts"),
 		usageUsersCount:       newSystemGauge(registry, MetricsSubsystemUsage, "users_total", "Total number of users"),
 		usageStorage:          newSystemGauge(registry, MetricsSubsystemUsage, "storage_bytes", "Storage usage in bytes"),
@@ -67,7 +85,11 @@ func NewExporter() *Exporter {
 	}
 }
 
-func (o *Exporter) ExportMetrics(metrics *controller.Metrics) error {
+func (o *Exporter) ExportMetrics(metrics *domain.MetricsData) error {
+	o.metrics.info.WithLabelValues(metrics.MattermostVersion, metrics.MattermostEdition, metrics.SQLDriverName).Set(1.0)
+
+	o.metrics.startTimeSeconds.Set(float64(metrics.MattermostInstallationTime.Unix()))
+
 	o.metrics.usagePostCount.Set(float64(metrics.UsagePostsCount))
 	o.metrics.usageUsersCount.Set(float64(metrics.UsageUsersCount))
 	o.metrics.systemHealth.Set(boolToFloat64(metrics.SystemHealth))
