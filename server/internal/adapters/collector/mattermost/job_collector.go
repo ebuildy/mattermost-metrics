@@ -1,6 +1,9 @@
 package mattermost
 
-import "github.com/ebuildy/mattermost-plugin-minotor/server/internal/core/domain"
+import (
+	"github.com/ebuildy/mattermost-plugin-minotor/server/internal/core/domain"
+	"time"
+)
 
 func (c *Collector) collectJob() *domain.MetricsDataJobs {
 	var countByTypesStatus []domain.JobCountByStatusType
@@ -28,5 +31,6 @@ func (c *Collector) collectJob() *domain.MetricsDataJobs {
 
 	return &domain.MetricsDataJobs{
 		CountByTypesStatus: countByTypesStatus,
+		Last:               time.Unix(c.gateway.SQLValue("SELECT MAX(createat) FROM jobs"), 0),
 	}
 }

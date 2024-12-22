@@ -10,6 +10,7 @@ import (
 type Collector struct {
 	logger  ports.Logger
 	gateway *mattermost_gateway.Client
+	config  *domain.ConfigCollector
 }
 
 func NewCollector(logger ports.Logger, gateway *mattermost_gateway.Client) *Collector {
@@ -17,6 +18,10 @@ func NewCollector(logger ports.Logger, gateway *mattermost_gateway.Client) *Coll
 		logger:  logger,
 		gateway: gateway,
 	}
+}
+
+func (c *Collector) Configure(config *domain.ConfigCollector) {
+	c.config = config
 }
 
 // CollectMetrics is the public API to run metrics harvest
@@ -29,6 +34,10 @@ func (c *Collector) CollectMetrics(metrics *domain.MetricsData) error {
 	metrics.KPI = c.collectKPI()
 	metrics.Health = c.collectHealth(ctx)
 	metrics.Jobs = c.collectJob()
+
+	if c.config.ReactionEnabled {
+		metrics.Reactions = c.collectReaction(c.config.ReactionCountByEmojiLimits)
+	}
 
 	return nil
 }

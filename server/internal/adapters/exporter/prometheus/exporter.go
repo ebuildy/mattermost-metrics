@@ -48,6 +48,7 @@ func NewExporter() *Exporter {
 			newInfo(registry),
 			newKPI(registry),
 			newJob(registry),
+			newReaction(registry),
 		},
 	}
 }

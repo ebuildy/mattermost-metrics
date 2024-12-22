@@ -5,6 +5,7 @@ import (
 	"github.com/ebuildy/mattermost-plugin-minotor/server/internal/adapters/exporter/prometheus"
 	"github.com/ebuildy/mattermost-plugin-minotor/server/internal/adapters/handler"
 	"github.com/ebuildy/mattermost-plugin-minotor/server/internal/adapters/services/mattermost_gateway"
+	"github.com/ebuildy/mattermost-plugin-minotor/server/internal/core/domain"
 	"github.com/ebuildy/mattermost-plugin-minotor/server/internal/core/ports"
 	"net/http"
 	"sync"
@@ -65,6 +66,12 @@ func (p *Plugin) OnActivate() error {
 	}
 
 	p.mattermostCollector = mattermost.NewCollector(logger, mattermostGatewayClient)
+
+	p.mattermostCollector.Configure(&domain.ConfigCollector{
+		ReactionEnabled:            true,
+		ReactionCountByEmojiLimits: 5,
+	})
+
 	p.exporter = prometheus.NewExporter()
 	p.metricsHandler = handler.NewMetricsHandler(logger, []ports.MetricsCollector{p.mattermostCollector}, p.exporter)
 

@@ -6,6 +6,7 @@ import (
 )
 
 type MetricsCollector interface {
+	Configure(config *domain.ConfigCollector)
 	CollectMetrics(metrics *domain.MetricsData) error
 }
 

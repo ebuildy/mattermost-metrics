@@ -11,10 +11,11 @@ type MetricsData struct {
 
 	SQLStats sql.DBStats
 
-	Info   *MetricsDataInfo
-	Health *MetricsDataHealth
-	KPI    *MetricsDataKPI
-	Jobs   *MetricsDataJobs
+	Info      *MetricsDataInfo
+	Health    *MetricsDataHealth
+	KPI       *MetricsDataKPI
+	Jobs      *MetricsDataJobs
+	Reactions *MetricsDataReactions
 }
 
 type MetricsDataInfo struct {
@@ -37,9 +38,20 @@ type MetricsDataKPI struct {
 
 type MetricsDataJobs struct {
 	CountByTypesStatus []JobCountByStatusType
+	Last               time.Time
 }
 
 type JobCountByStatusType struct {
-	Status, Type string
+	Type, Status string
 	Count        int64
+}
+
+type MetricsDataReactions struct {
+	CountByEmoji []ReactionCountByEmoji
+	Last         time.Time
+}
+
+type ReactionCountByEmoji struct {
+	Emoji string
+	Count int64
 }
