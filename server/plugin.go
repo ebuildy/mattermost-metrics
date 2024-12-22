@@ -92,7 +92,7 @@ func (p *Plugin) OnActivate() error {
 
 	p.apiAccessTokenId = &accessTokenResp.Id
 	p.router = mux.NewRouter()
-	p.driver = collector.NewAuthenticatedDriver(&p.pluginAPIClient.Log, p.pluginAPIClient, accessTokenResp.Token, "http://localhost:8065")
+	p.driver = collector.NewAuthenticatedAPICollector(&p.pluginAPIClient.Log, p.pluginAPIClient, accessTokenResp.Token, "http://localhost:8065")
 	p.exporter = exporter.NewExporter()
 	p.metricsHandler = handler.NewMetricsHandler(&p.pluginAPIClient.Log, p.driver, p.exporter)
 

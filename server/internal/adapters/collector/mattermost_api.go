@@ -15,7 +15,7 @@ type Driver struct {
 	pluginAPIClient *pluginapi.Client
 }
 
-func NewAuthenticatedDriver(logger ports.Logger, pluginAPIClient *pluginapi.Client, accessToken string, endpointURL string) *Driver {
+func NewAuthenticatedAPICollector(logger ports.Logger, pluginAPIClient *pluginapi.Client, accessToken string, endpointURL string) *Driver {
 	client := model.NewAPIv4Client(endpointURL)
 
 	client.SetToken(accessToken)
@@ -27,7 +27,7 @@ func NewAuthenticatedDriver(logger ports.Logger, pluginAPIClient *pluginapi.Clie
 	}
 }
 
-func NewDriver(logger ports.Logger, endpointURL string) *Driver {
+func NewAPICollector(logger ports.Logger, endpointURL string) *Driver {
 	client := model.NewAPIv4Client(endpointURL)
 
 	return &Driver{
