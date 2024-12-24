@@ -3,7 +3,6 @@ module github.com/ebuildy/mattermost-plugin-minotor
 go 1.23.3
 
 require (
-	github.com/gorilla/mux v1.8.1
 	github.com/jarcoal/httpmock v1.3.1
 	github.com/mattermost/mattermost/server/public v0.1.5
 	github.com/pkg/errors v0.9.1
@@ -48,6 +47,7 @@ require (
 	github.com/prometheus/common v0.55.0 // indirect
 	github.com/prometheus/procfs v0.15.1 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
+	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/tinylib/msgp v1.2.0 // indirect
 	github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect

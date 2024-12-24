@@ -5,6 +5,7 @@ import (
 	"time"
 )
 
+// collectJob retrieves job data from the database, including job counts grouped by type and status, and returns metric data.
 func (c *Collector) collectJob() *domain.MetricsDataJobs {
 	var countByTypesStatus []domain.JobCountByStatusType
 

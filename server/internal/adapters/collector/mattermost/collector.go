@@ -7,6 +7,7 @@ import (
 	"github.com/ebuildy/mattermost-plugin-minotor/server/internal/core/ports"
 )
 
+// Collector is responsible for collecting various metrics and aggregating data from different sources.
 type Collector struct {
 	logger  ports.Logger
 	gateway *mattermost_gateway.Client
