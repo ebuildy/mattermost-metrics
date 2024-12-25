@@ -5,6 +5,8 @@ import (
 	"net/url"
 	"testing"
 
+	"github.com/ebuildy/mattermost-plugin-minotor/server/internal/adapters/logger/fake"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -21,7 +23,7 @@ func TestMetrics_HTTPHandler(t *testing.T) {
 		},
 	}
 
-	o := NewExporter()
+	o := NewExporter(fake.NewFakeLogger())
 	httpHandler := o.HTTPHandler
 
 	u, _ := url.Parse("http://localhost/metrics")

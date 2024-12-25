@@ -1,18 +1,18 @@
 package main
 
 import (
-	"github.com/ebuildy/mattermost-plugin-minotor/server/internal/adapters/collector/mattermost"
-	"github.com/ebuildy/mattermost-plugin-minotor/server/internal/adapters/exporter/prometheus"
-	"github.com/ebuildy/mattermost-plugin-minotor/server/internal/adapters/handler"
-	"github.com/ebuildy/mattermost-plugin-minotor/server/internal/adapters/services/mattermost_gateway"
-	"github.com/ebuildy/mattermost-plugin-minotor/server/internal/core/domain"
-	"github.com/ebuildy/mattermost-plugin-minotor/server/internal/core/ports"
 	"net/http"
 	"sync"
 
+	"github.com/ebuildy/mattermost-plugin-minotor/server/config"
+	"github.com/ebuildy/mattermost-plugin-minotor/server/internal/adapters/collector/mattermost"
+	"github.com/ebuildy/mattermost-plugin-minotor/server/internal/adapters/exporter/prometheus"
+	"github.com/ebuildy/mattermost-plugin-minotor/server/internal/adapters/handler"
+	"github.com/ebuildy/mattermost-plugin-minotor/server/internal/core/domain"
+	"github.com/ebuildy/mattermost-plugin-minotor/server/internal/core/ports"
+
 	"github.com/pkg/errors"
 
-	"github.com/ebuildy/mattermost-plugin-minotor/server/config"
 	"github.com/mattermost/mattermost/server/public/plugin"
 	"github.com/mattermost/mattermost/server/public/pluginapi"
 )
@@ -35,7 +35,7 @@ type Plugin struct {
 	mattermostCollector *mattermost.Collector
 	metricsHandler      *handler.MetricsHandler
 
-	mattermostGatewayClient *mattermost_gateway.Client
+	mattermostGatewayClient *mattermost.Client
 }
 
 func (p *Plugin) ServeMetrics(c *plugin.Context, w http.ResponseWriter, r *http.Request) {
@@ -52,7 +52,7 @@ func (p *Plugin) OnActivate() error {
 
 	logger := &p.pluginAPIClient.Log
 
-	mattermostGatewayClient, err := mattermost_gateway.NewClient(p.pluginAPIClient)
+	mattermostGatewayClient, err := mattermost.NewClient(p.pluginAPIClient)
 
 	if err != nil {
 		return errors.Wrapf(err, "failed to create mattermost gateway client")
@@ -72,7 +72,7 @@ func (p *Plugin) OnActivate() error {
 		ReactionCountByEmojiLimits: 5,
 	})
 
-	p.exporter = prometheus.NewExporter()
+	p.exporter = prometheus.NewExporter(logger)
 	p.metricsHandler = handler.NewMetricsHandler(logger, []ports.MetricsCollector{p.mattermostCollector}, p.exporter)
 
 	return nil

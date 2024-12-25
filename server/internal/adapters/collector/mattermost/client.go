@@ -1,12 +1,15 @@
-package mattermost_gateway
+package mattermost
 
 import (
 	"database/sql"
 	"fmt"
+
+	"github.com/pkg/errors"
+
 	"github.com/ebuildy/mattermost-plugin-minotor/server/internal/core/ports"
+
 	"github.com/mattermost/mattermost/server/public/model"
 	"github.com/mattermost/mattermost/server/public/pluginapi"
-	"github.com/pkg/errors"
 )
 
 // Client allow to communicate with Mattermost
@@ -22,7 +25,6 @@ type Client struct {
 }
 
 func NewClient(pluginAPI *pluginapi.Client) (*Client, error) {
-
 	logger := &pluginAPI.Log
 
 	bot, err := getBot(pluginAPI)
@@ -97,9 +99,12 @@ func getBot(pluginAPI *pluginapi.Client) (*model.Bot, error) {
 }
 
 func getDBClient(pluginAPI *pluginapi.Client) (*sql.DB, error) {
-	pluginAPI.Store.GetMasterDB()
-	mattermostDBClient, err := pluginAPI.Store.GetReplicaDB()
+	_, err := pluginAPI.Store.GetMasterDB()
+	if err != nil {
+		return nil, err
+	}
 
+	mattermostDBClient, err := pluginAPI.Store.GetReplicaDB()
 	if err != nil {
 		return nil, err
 	}

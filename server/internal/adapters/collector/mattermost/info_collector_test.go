@@ -1,17 +1,20 @@
 package mattermost
 
 import (
-	"github.com/ebuildy/mattermost-plugin-minotor/server/internal/adapters/logger/fake"
-	"github.com/ebuildy/mattermost-plugin-minotor/server/internal/adapters/services/mattermost_gateway"
-	"github.com/ebuildy/mattermost-plugin-minotor/server/internal/core/domain"
-	"github.com/ebuildy/mattermost-plugin-minotor/server/internal/utils"
+	"testing"
+	"time"
+
 	"github.com/jarcoal/httpmock"
+
 	"github.com/mattermost/mattermost/server/public/model"
 	"github.com/mattermost/mattermost/server/public/plugin/plugintest"
 	"github.com/mattermost/mattermost/server/public/pluginapi"
+
 	"github.com/stretchr/testify/assert"
-	"testing"
-	"time"
+
+	"github.com/ebuildy/mattermost-plugin-minotor/server/internal/adapters/logger/fake"
+	"github.com/ebuildy/mattermost-plugin-minotor/server/internal/core/domain"
+	"github.com/ebuildy/mattermost-plugin-minotor/server/internal/utils"
 )
 
 func TestDriver_collectInfo(t *testing.T) {
@@ -80,7 +83,7 @@ func TestDriver_collectInfo(t *testing.T) {
 	for _, tt := range tests {
 		api := plugintest.NewAPI(t)
 
-		mattermostGatewayClient := &mattermost_gateway.Client{
+		mattermostGatewayClient := &Client{
 			API:       model.NewAPIv4Client(mattermostEndpointURL),
 			PluginAPI: pluginapi.NewClient(api, &plugintest.Driver{}),
 		}

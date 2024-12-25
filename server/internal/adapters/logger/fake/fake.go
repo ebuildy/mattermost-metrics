@@ -2,6 +2,7 @@ package fake
 
 import (
 	"fmt"
+
 	"github.com/ebuildy/mattermost-plugin-minotor/server/internal/core/ports"
 )
 

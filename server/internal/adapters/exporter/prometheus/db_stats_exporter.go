@@ -2,6 +2,7 @@ package prometheus
 
 import (
 	"database/sql"
+
 	"github.com/prometheus/client_golang/prometheus"
 )
 

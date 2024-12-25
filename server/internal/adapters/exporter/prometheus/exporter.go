@@ -1,9 +1,10 @@
 package prometheus
 
 import (
+	"net/http"
+
 	"github.com/ebuildy/mattermost-plugin-minotor/server/internal/core/domain"
 	"github.com/ebuildy/mattermost-plugin-minotor/server/internal/core/ports"
-	"net/http"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
@@ -21,15 +22,15 @@ type Exporter struct {
 	Registry    *prometheus.Registry
 	metrics     *metrics
 	HTTPHandler http.Handler
-
-	exporters []ports.MetricsExporter
+	logger      ports.Logger
+	exporters   []ports.MetricsExporter
 }
 
 type metrics struct {
 	dbStats *DBStatsExporter
 }
 
-func NewExporter() *Exporter {
+func NewExporter(logger ports.Logger) *Exporter {
 	registry := prometheus.NewRegistry()
 
 	metrics := &metrics{
@@ -37,13 +38,14 @@ func NewExporter() *Exporter {
 	}
 
 	return &Exporter{
-		registry,
-		metrics,
-		promhttp.HandlerFor(registry, promhttp.HandlerOpts{
+		logger:   logger,
+		Registry: registry,
+		metrics:  metrics,
+		HTTPHandler: promhttp.HandlerFor(registry, promhttp.HandlerOpts{
 			EnableOpenMetrics: false,
 			Registry:          registry,
 		}),
-		[]ports.MetricsExporter{
+		exporters: []ports.MetricsExporter{
 			newHealth(registry),
 			newInfo(registry),
 			newKPI(registry),
@@ -54,14 +56,15 @@ func NewExporter() *Exporter {
 }
 
 func (o *Exporter) ExportMetrics(metrics *domain.MetricsData) error {
-
 	o.metrics.dbStats.bindDBStats(metrics.SQLStats)
 
 	for _, exporter := range o.exporters {
 		err := exporter.ExportMetrics(metrics)
 
 		if err != nil {
-
+			o.logger.Error(
+				"failed to export metrics",
+				"error", err)
 		}
 	}
 

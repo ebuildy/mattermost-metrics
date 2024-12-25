@@ -1,8 +1,9 @@
 package mattermost
 
 import (
-	"github.com/ebuildy/mattermost-plugin-minotor/server/internal/core/domain"
 	"time"
+
+	"github.com/ebuildy/mattermost-plugin-minotor/server/internal/core/domain"
 )
 
 // collectJob retrieves job data from the database, including job counts grouped by type and status, and returns metric data.

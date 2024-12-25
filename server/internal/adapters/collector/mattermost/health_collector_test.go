@@ -3,13 +3,13 @@ package mattermost
 import (
 	"context"
 	"fmt"
-	"github.com/ebuildy/mattermost-plugin-minotor/server/internal/adapters/logger/fake"
-	"github.com/ebuildy/mattermost-plugin-minotor/server/internal/adapters/services/mattermost_gateway"
-	"github.com/ebuildy/mattermost-plugin-minotor/server/internal/core/domain"
-	"github.com/mattermost/mattermost/server/public/model"
 	"testing"
 
+	"github.com/ebuildy/mattermost-plugin-minotor/server/internal/adapters/logger/fake"
+	"github.com/ebuildy/mattermost-plugin-minotor/server/internal/core/domain"
+
 	"github.com/jarcoal/httpmock"
+	"github.com/mattermost/mattermost/server/public/model"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -17,7 +17,7 @@ const (
 	mattermostEndpointURL = "http://test:8080"
 )
 
-//func TestDriver_collectMetricsUsage(t *testing.T) {
+// func TestDriver_collectMetricsUsage(t *testing.T) {
 //	httpmock.Activate()
 //
 //	tests := []struct {
@@ -53,7 +53,7 @@ const (
 //			assert.Equal(t, tt.want, metrics.UsagePostsCount)
 //		})
 //	}
-//}
+// }
 
 func TestDriver_collectMetricsHealth(t *testing.T) {
 	httpmock.Activate()
@@ -80,7 +80,7 @@ func TestDriver_collectMetricsHealth(t *testing.T) {
 		},
 	}
 
-	mattermostGatewayClient := &mattermost_gateway.Client{
+	mattermostGatewayClient := &Client{
 		API: model.NewAPIv4Client(mattermostEndpointURL),
 	}
 
@@ -98,7 +98,7 @@ func TestDriver_collectMetricsHealth(t *testing.T) {
 	}
 }
 
-//func TestDriver_collectKPIMetrics(t *testing.T) {
+// func TestDriver_collectKPIMetrics(t *testing.T) {
 //	httpmock.Activate()
 //	t.Cleanup(httpmock.DeactivateAndReset)
 //
@@ -226,4 +226,4 @@ func TestDriver_collectMetricsHealth(t *testing.T) {
 //			assert.Equal(t, tt.want.KPIChannelsLastCreationDate, metrics.KPIChannelsLastCreationDate, "KPIChannelsLastCreationDate")
 //		})
 //	}
-//}
+// }

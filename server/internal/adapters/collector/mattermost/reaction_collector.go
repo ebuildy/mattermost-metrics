@@ -2,8 +2,9 @@ package mattermost
 
 import (
 	"fmt"
-	"github.com/ebuildy/mattermost-plugin-minotor/server/internal/core/domain"
 	"time"
+
+	"github.com/ebuildy/mattermost-plugin-minotor/server/internal/core/domain"
 )
 
 func (c *Collector) collectReaction(countByEmojiLimits int) *domain.MetricsDataReactions {

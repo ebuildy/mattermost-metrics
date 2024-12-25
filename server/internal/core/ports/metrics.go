@@ -1,8 +1,9 @@
 package ports
 
 import (
-	"github.com/ebuildy/mattermost-plugin-minotor/server/internal/core/domain"
 	"net/http"
+
+	"github.com/ebuildy/mattermost-plugin-minotor/server/internal/core/domain"
 )
 
 type MetricsCollector interface {

@@ -1,9 +1,10 @@
 package handler
 
 import (
+	"net/http"
+
 	"github.com/ebuildy/mattermost-plugin-minotor/server/internal/core/domain"
 	"github.com/ebuildy/mattermost-plugin-minotor/server/internal/core/ports"
-	"net/http"
 )
 
 type MetricsHandler struct {

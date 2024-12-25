@@ -3,8 +3,10 @@ package mattermost
 import (
 	"context"
 	"fmt"
-	"github.com/ebuildy/mattermost-plugin-minotor/server/internal/core/domain"
+
 	"github.com/mattermost/mattermost/server/public/model"
+
+	"github.com/ebuildy/mattermost-plugin-minotor/server/internal/core/domain"
 )
 
 // collectHealth gathers system health metrics including overall status, database, and filestore health.

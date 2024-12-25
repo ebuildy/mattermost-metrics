@@ -1,8 +1,9 @@
 package prometheus
 
 import (
-	"github.com/ebuildy/mattermost-plugin-minotor/server/internal/core/domain"
 	"github.com/prometheus/client_golang/prometheus"
+
+	"github.com/ebuildy/mattermost-plugin-minotor/server/internal/core/domain"
 )
 
 type HealthExporter struct {

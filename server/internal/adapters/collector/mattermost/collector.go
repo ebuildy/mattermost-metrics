@@ -2,7 +2,7 @@ package mattermost
 
 import (
 	"context"
-	"github.com/ebuildy/mattermost-plugin-minotor/server/internal/adapters/services/mattermost_gateway"
+
 	"github.com/ebuildy/mattermost-plugin-minotor/server/internal/core/domain"
 	"github.com/ebuildy/mattermost-plugin-minotor/server/internal/core/ports"
 )
@@ -10,11 +10,11 @@ import (
 // Collector is responsible for collecting various metrics and aggregating data from different sources.
 type Collector struct {
 	logger  ports.Logger
-	gateway *mattermost_gateway.Client
+	gateway *Client
 	config  *domain.ConfigCollector
 }
 
-func NewCollector(logger ports.Logger, gateway *mattermost_gateway.Client) *Collector {
+func NewCollector(logger ports.Logger, gateway *Client) *Collector {
 	return &Collector{
 		logger:  logger,
 		gateway: gateway,
