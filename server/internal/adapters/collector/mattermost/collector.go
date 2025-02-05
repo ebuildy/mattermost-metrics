@@ -36,6 +36,10 @@ func (c *Collector) CollectMetrics(metrics *domain.MetricsData) error {
 	metrics.Health = c.collectHealth(ctx)
 	metrics.Jobs = c.collectJob()
 
+	if c.config.CallsEnabled {
+		metrics.Calls = c.collectCall()
+	}
+
 	if c.config.ReactionEnabled {
 		metrics.Reactions = c.collectReaction(c.config.ReactionCountByEmojiLimits)
 	}

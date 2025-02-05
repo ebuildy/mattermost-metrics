@@ -16,6 +16,7 @@ type MetricsData struct {
 	KPI       *MetricsDataKPI
 	Jobs      *MetricsDataJobs
 	Reactions *MetricsDataReactions
+	Calls     *MetricsDataCalls
 }
 
 type MetricsDataInfo struct {
@@ -49,6 +50,10 @@ type JobCountByStatusType struct {
 type MetricsDataReactions struct {
 	CountByEmoji []ReactionCountByEmoji
 	Last         time.Time
+}
+
+type MetricsDataCalls struct {
+	Count, Last, Duration int64
 }
 
 type ReactionCountByEmoji struct {

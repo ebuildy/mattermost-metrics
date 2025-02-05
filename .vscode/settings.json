@@ -1,5 +1,6 @@
 {
     "eslint.workingDirectories": [
         "webapp"
-    ]
+    ],
+    "makefile.configureOnOpen": false
 }

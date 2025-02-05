@@ -51,6 +51,7 @@ func NewExporter(logger ports.Logger) *Exporter {
 			newKPI(registry),
 			newJob(registry),
 			newReaction(registry),
+			newCall(registry),
 		},
 	}
 }

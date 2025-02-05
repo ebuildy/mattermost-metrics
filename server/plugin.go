@@ -69,6 +69,7 @@ func (p *Plugin) OnActivate() error {
 
 	p.mattermostCollector.Configure(&domain.ConfigCollector{
 		ReactionEnabled:            true,
+		CallsEnabled:               true,
 		ReactionCountByEmojiLimits: 5,
 	})
 
