@@ -99,6 +99,8 @@ promhttp_metric_handler_errors_total{cause="encoding"} 0
 promhttp_metric_handler_errors_total{cause="gathering"} 0
 ```
 
+Metrics are available on Metrics route at <http://localhost:8067/plugins/org.ebuildy.plugin-minotor/metrics>.
+
 ## Getting Started
 
 ### Installation
@@ -113,6 +115,8 @@ Configure your Prometheus or Grafana alloy to scrap endpoint: `/plugins/org.ebui
 
 ## Development
 
+You must have a running Mattermost instance, <https://github.com/mattermost/docker> provide a simple docker compose stack to run Mattermost.
+
 To avoid having to manually install your plugin, build and deploy your plugin using one of the following options. In order for the below options to work, you must first enable plugin uploads via your config.json or API and restart Mattermost.
 
 ```json
@@ -121,6 +125,40 @@ To avoid having to manually install your plugin, build and deploy your plugin us
         "EnableUploads" : true
     }
 ```
+
+Create a fresh Mattermost admin user, then deploy the plugin:
+
+```sh
+# Enter container
+docker exec -ti mattermost-docker-mattermost-1 bash
+
+# Create admin user
+# Run on mattermost container
+/mattermost/bin/mmctl --local user create --email admin@example.org --username admin --password password --system-admin
+
+# leave container
+exit
+
+# Deploy
+export MM_SERVICESETTINGS_SITEURL=http://localhost:8065
+export MM_ADMIN_USERNAME=admin
+export MM_ADMIN_PASSWORD=password
+
+make deploy
+```
+
+### Check plugin is running
+
+Inside Mattermost container (`docker exec -ti mattermost-docker-mattermost-1 bash`), you can see plugins are running in a separate process:
+
+```sh
+mattermost@19d85588c0d4:~$ ps aux
+USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+matterm+       1  1.0  1.8 2516352 140140 ?      Ssl  07:36   0:15 /mattermost/bin/mattermost
+matterm+      10  0.0  0.6 1650588 52500 ?       Sl   07:36   0:01 plugins/com.mattermost.mattermost-plugin-metrics/server/dist/plugin-linux-amd64
+matterm+      28  0.0  0.5 1518064 41416 ?       Sl   07:36   0:00 plugins/com.mattermost.calls/server/dist/plugin-linux-amd64
+matterm+      83  0.0  0.4 1508772 30424 ?       Sl   07:46   0:00 plugins/org.ebuildy.plugin-minotor/server/dist/plugin-linux-amd64
+``` 
 
 ### Deploying with Local Mode
 
