@@ -30,10 +30,16 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: |
+            dist/*.tar.gz
+            dist/release-notes.md
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
           body_path: dist/release-notes.md
           files: |
-            dist/release-notes.md
-            dist.zip
+            dist/org.ebuildy.plugin-minotor-0.1.0.tar.gz
