@@ -19,3 +19,17 @@ jobs:
     with:
       golang-version: 1.23
       golangci-lint-version: v1.64.8
+
+  release:
+    runs-on: ubuntu-latest
+    # if: github.ref_type == 'tag'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: dist/release-notes.md
+          files: |
+            dist/release-notes.md
+            dist.zip
