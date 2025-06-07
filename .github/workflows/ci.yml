@@ -9,6 +9,7 @@ on:
       - ci_release
     tags:
       - "v*"
+      - "test-ci*"
   pull_request:
 
 permissions:
