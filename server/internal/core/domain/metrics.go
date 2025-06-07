@@ -33,8 +33,8 @@ type MetricsDataHealth struct {
 }
 
 type MetricsDataKPI struct {
-	KPILastPostDate, KPIChannelsLastCreationDate, KPIPostsCount, KPISessionsCount int64
-	KPIPrivateChannelsCount, KPIPublicChannelsCount, KPIDirectMessagesCount       int64
+	KPILastPostDate, KPIChannelsLastCreationDate, KPIPostsCount, KPISessionsCount, ThreadsCount int64
+	KPIPrivateChannelsCount, KPIPublicChannelsCount, KPIDirectMessagesCount                     int64
 }
 
 type MetricsDataJobs struct {

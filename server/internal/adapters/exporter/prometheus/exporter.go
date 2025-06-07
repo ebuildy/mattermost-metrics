@@ -20,27 +20,17 @@ const (
 
 type Exporter struct {
 	Registry    *prometheus.Registry
-	metrics     *metrics
 	HTTPHandler http.Handler
 	logger      ports.Logger
 	exporters   []ports.MetricsExporter
 }
 
-type metrics struct {
-	dbStats *DBStatsExporter
-}
-
 func NewExporter(logger ports.Logger) *Exporter {
 	registry := prometheus.NewRegistry()
-
-	metrics := &metrics{
-		dbStats: newDBStats(registry),
-	}
 
 	return &Exporter{
 		logger:   logger,
 		Registry: registry,
-		metrics:  metrics,
 		HTTPHandler: promhttp.HandlerFor(registry, promhttp.HandlerOpts{
 			EnableOpenMetrics: false,
 			Registry:          registry,
@@ -57,8 +47,6 @@ func NewExporter(logger ports.Logger) *Exporter {
 }
 
 func (o *Exporter) ExportMetrics(metrics *domain.MetricsData) error {
-	o.metrics.dbStats.bindDBStats(metrics.SQLStats)
-
 	for _, exporter := range o.exporters {
 		err := exporter.ExportMetrics(metrics)
 

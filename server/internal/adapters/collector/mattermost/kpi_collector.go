@@ -7,6 +7,7 @@ func (c *Collector) collectKPI() *domain.MetricsDataKPI {
 		KPILastPostDate:             c.gateway.SQLValue("SELECT MAX(createat) FROM posts"),
 		KPIChannelsLastCreationDate: c.gateway.SQLValue("SELECT MAX(createat) FROM channels"),
 		KPIPostsCount:               c.gateway.SQLValue("SELECT COUNT(*) FROM posts"),
+		ThreadsCount:                c.gateway.SQLValue("SELECT COUNT(*) FROM threads"),
 		KPISessionsCount:            c.gateway.SQLValue("SELECT COUNT(*) FROM sessions"),
 		KPIPrivateChannelsCount:     c.gateway.SQLValue("SELECT COUNT(*) FROM channels WHERE type = 'P'"),
 		KPIPublicChannelsCount:      c.gateway.SQLValue("SELECT COUNT(*) FROM channels WHERE type = 'O'"),

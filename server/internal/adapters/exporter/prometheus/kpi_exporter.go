@@ -9,7 +9,7 @@ import (
 type KPIExporter struct {
 	usagePostCount, usageUsersCount, usageStorage prometheus.Gauge
 
-	kpiPostsCount, kpiLastPostDate, sessionsCount prometheus.Gauge
+	kpiPostsCount, kpiLastPostDate, sessionsCount, threadsCount prometheus.Gauge
 
 	channelsCountByTypes *prometheus.GaugeVec
 }
@@ -22,6 +22,7 @@ func newKPI(registry *prometheus.Registry) KPIExporter {
 		kpiPostsCount:        newSystemGauge(registry, MetricsSubsystemKPI, "posts_total", "Total number of posts"),
 		kpiLastPostDate:      newSystemGauge(registry, MetricsSubsystemKPI, "last_post_date", "Timestamp of last post date"),
 		sessionsCount:        newSystemGauge(registry, MetricsSubsystemKPI, "sessions_total", "Total number of sessions"),
+		threadsCount:         newSystemGauge(registry, MetricsSubsystemKPI, "threads_total", "Total number of threads"),
 		channelsCountByTypes: newSystemGaugeWithLabels(registry, MetricsSubsystemKPI, "channels_total", "Number of channels by type", []string{"type"}),
 	}
 }
@@ -37,6 +38,7 @@ func (m KPIExporter) ExportMetrics(metrics *domain.MetricsData) error {
 	m.kpiLastPostDate.Set(float64(kpiMetrics.KPILastPostDate))
 
 	m.sessionsCount.Set(float64(kpiMetrics.KPISessionsCount))
+	m.threadsCount.Set(float64(kpiMetrics.ThreadsCount))
 
 	m.channelsCountByTypes.WithLabelValues("public").Set(float64(kpiMetrics.KPIPublicChannelsCount))
 	m.channelsCountByTypes.WithLabelValues("private").Set(float64(kpiMetrics.KPIPrivateChannelsCount))
