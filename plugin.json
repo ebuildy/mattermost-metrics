@@ -2,6 +2,7 @@
     "id": "org.ebuildy.plugin-minotor",
     "name": "Plugin Minotor",
     "description": "Expose usage metrics and KPI.",
+    "version": "0.1.0",
     "homepage_url": "https://github.com/ebuildy/mattermost-plugin-minotor",
     "support_url": "https://github.com/ebuildy/mattermost-plugin-minotor/issues",
     "icon_path": "assets/logo.png",
