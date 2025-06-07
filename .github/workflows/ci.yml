@@ -5,6 +5,8 @@ on:
   push:
     branches:
       - master
+      - main
+      - ci_release
     tags:
       - "v*"
   pull_request:
@@ -22,7 +24,7 @@ jobs:
 
   release:
     runs-on: ubuntu-latest
-    # if: github.ref_type == 'tag'
+    if: github.ref_type == 'tag'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
